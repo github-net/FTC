@@ -1,0 +1,12 @@
+try
+{
+Thread.sleep(5 * 1000);
+}catch(InterruptedException ie)
+{
+ //Log message if required.
+}
+
+/**
+* Can be used if error with sleep()
+* It works dude
+*/
