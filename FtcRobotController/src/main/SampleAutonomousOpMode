@@ -1,0 +1,46 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+/**
+ * This file is our Autonomous program for the Competition
+ */
+@Autonomous(name = "AutonomousOpMode")
+
+public class AutonomousOpMode extends LinearOpMode {
+
+    private ElapsedTime runtime = new ElapsedTime();
+
+
+
+    @Override
+    public void runOpMode() throws InterruptedException{
+        DcMotor leftmotor;
+        DcMotor rightmotor;
+        leftmotor = hardwareMap.dcMotor.get("leftmotor");
+        rightmotor = hardwareMap.dcMotor.get("rightmotor");
+        leftmotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightmotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        double leftpower = 0;
+        double rightpower = 0;
+        waitForStart();
+        //Drive the robot for a while
+        leftpower = 0.5;
+        rightpower = -1;
+        leftmotor.setPower(leftpower);
+        rightmotor.setPower(rightpower);
+        Thread.sleep(2000);
+        leftpower = 0;
+        rightpower = 0;
+        leftmotor.setPower(leftpower);
+        rightmotor.setPower(rightpower);
+
+    }
+}
