@@ -71,12 +71,12 @@ public class MySecondJavaOpMode extends LinearOpMode {
             if (lift_button == true) {
                 lift.setPower(1500);
                 sleep(250);
-                arm.setPower(0);
+                lift.setPower(0);
             }
             if (lift_button_reverse == true) {
                 lift.setPower(-1500);
                 sleep(250);
-                arm.setPower(0);
+                lift.setPower(0);
             }
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
