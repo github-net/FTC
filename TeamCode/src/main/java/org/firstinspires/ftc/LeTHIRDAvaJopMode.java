@@ -72,7 +72,8 @@ public class MySecondJavaOpMode extends LinearOpMode {
                 lift.setPower(1500);
                 sleep(250);
                 arm.setPower(0);
-            }if (lift_button_reverse == true) {
+            }
+            if (lift_button_reverse == true) {
                 lift.setPower(-1500);
                 sleep(250);
                 arm.setPower(0);
