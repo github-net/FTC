@@ -48,7 +48,7 @@ public class MySecondJavaOpMode extends LinearOpMode {
             double rightPower;
             //change the negative
             boolean lift_button = gamepad2.x;
-            boolean lift_button_reverse = gamepad2.y
+            boolean lift_button_reverse = gamepad2.y;
             boolean button_press = gamepad2.a;
             boolean reverse_button_press = gamepad2.b;
             double drive = gamepad1.left_stick_y;
