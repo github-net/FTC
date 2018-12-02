@@ -15,8 +15,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 /**
-
  working version
+ No grip for now
  */
 
 @TeleOp(name="Le THIRD AvA jOp Mode", group="Iterative Opmode")
@@ -31,7 +31,7 @@ public class LeTHIRDAvaJopMode extends OpMode
     private DcMotor back_rightDrive = null;
     private DcMotor arm = null;
     private CRServo capturing = null;
-    //private Servo grip = null;
+    private Servo grip = null;
     private DcMotor lift = null;
 
     /*
@@ -51,7 +51,7 @@ public class LeTHIRDAvaJopMode extends OpMode
         arm        = hardwareMap.get(DcMotor.class, "arm");
         capturing = hardwareMap.get(CRServo.class, "capturing");
         lift = hardwareMap.get(DcMotor.class, "lift");
-        //grip = hardwareMap.get(Servo.class, "grip");
+        grip = hardwareMap.get(Servo.class, "grip");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
@@ -79,8 +79,8 @@ public class LeTHIRDAvaJopMode extends OpMode
         boolean button_down = gamepad2.b;
         boolean button_press = gamepad2.x;          //x and y for lift
         boolean reverse_button_press = gamepad2.y;
-        //boolean button_grip_close = gamepad2.left_bumper; //grip close
-        //boolean button_grip_open = gamepad2.right_bumper; //grip open
+        boolean button_grip_close = gamepad2.left_bumper; //grip close
+        boolean button_grip_open = gamepad2.right_bumper; //grip open
 
         float capturing_power = gamepad2.left_trigger; //left trigger for capturing power
         double back_drive = gamepad1.right_stick_x; //back drive
@@ -88,6 +88,8 @@ public class LeTHIRDAvaJopMode extends OpMode
         double drive =  -gamepad1.left_stick_y; //front drive
         double turn  =  gamepad1.left_stick_x; //front turn
 
+        boolean arm_preset_up = gamepad2.dpad_up; //press dpad up to do arm preset up
+        boolean arm_preset_down = gamepad2.dpad_down; //press dpad down to do arm preset down
 
         leftPower        = Range.clip(drive + turn, -0.75, 0.75) ;
         rightPower       = Range.clip(drive - turn, -0.75, 0.75) ;
@@ -101,6 +103,36 @@ public class LeTHIRDAvaJopMode extends OpMode
 
         int time;
         time = 250;
+        /**
+         * ARM PRESET UP
+         */
+        if(arm_preset_up == true){
+            arm.setPower(-25);
+            try{
+                java.lang.Thread.sleep(550);
+            }catch(InterruptedException ie){
+
+            }
+            arm.setPower(0);
+        }
+        /**
+         * ARM PRESET DOWN
+         */
+        if(arm_preset_down == true){
+            arm.setPower(25);
+            try{
+                java.lang.Thread.sleep(400);
+            }catch(InterruptedException ie){
+
+            }
+            arm.setPower(-25);
+            try{
+                java.lang.Thread.sleep(50);
+            }catch(InterruptedException ie){
+
+            }
+            arm.setPower(0);
+        }
         /**
          * LIFT
          */
@@ -151,8 +183,6 @@ public class LeTHIRDAvaJopMode extends OpMode
             //end of try and catch code
             arm.setPower(0);
         }
-        /**
-         * GRIP NOT USED ANYMORE
 
         if (button_grip_open == true) {
             grip.setPosition(100); // Grip Open
@@ -160,7 +190,7 @@ public class LeTHIRDAvaJopMode extends OpMode
         if (button_grip_close == true) {
             grip.setPosition(0); // Grip Close
         }
-        */
+
         // Send calculated power to wheels
 
         leftDrive.setPower(leftPower);
