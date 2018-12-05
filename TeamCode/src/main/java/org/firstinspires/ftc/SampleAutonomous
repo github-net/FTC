@@ -1,0 +1,120 @@
+package org.firstinspires.ftc.teamcode;
+
+import android.util.Log;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
+
+@Autonomous
+public class SampleAutonomous extends LinearOpMode {
+
+    private DcMotor leftDrive = null;
+    private DcMotor rightDrive = null;
+    private DcMotor back_leftDrive = null;
+    private DcMotor back_rightDrive = null;
+    private DcMotor arm = null;
+    private CRServo capturing = null;
+    private DcMotor lift = null;
+    private Servo grip = null;
+    private ElapsedTime runtime = new ElapsedTime();
+
+    ElapsedTime runTime = new ElapsedTime();
+
+    @Override public void runOpMode() {
+        telemetry.addData("Le Status", "is very Initialization");
+        //hardware mapping
+        leftDrive = hardwareMap.get(DcMotor.class, "left_drive");
+        rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
+        back_leftDrive  = hardwareMap.get(DcMotor.class, "back_left_drive");
+        back_rightDrive = hardwareMap.get(DcMotor.class, "back_right_drive");
+        arm = hardwareMap.get(DcMotor.class, "arm");
+        capturing = hardwareMap.get(CRServo.class, "capturing");
+        lift = hardwareMap.get(DcMotor.class, "lift");
+        grip = hardwareMap.get(Servo.class, "grip");
+
+        // Most robots need the motor on one side to be reversed to drive forward
+        // Reverse the motor that runs backwards when connected directly to the battery
+        leftDrive.setDirection(DcMotor.Direction.REVERSE);
+        arm.setDirection(DcMotor.Direction.FORWARD);
+
+        telemetry.addData("Status", "Ready to roll, roll, roll...");
+        telemetry.update();
+        // Wait for the game to start (driver presses PLAY)
+
+        waitForStart();
+
+        //START
+
+        LiftDown(-100,5000);
+        GripOpen(100,500);
+
+        /**
+        DriveForwardTime(-1,1500);
+        sleep(500);
+        TurnLeftTime(-1,1000);
+        sleep(500);
+        DriveForwardTime(-1,1500);
+        sleep(500);
+        TurnLeftTime(-1,1000);
+        StopDriving();
+        */
+
+
+        telemetry.addData("Time passed: ", runTime.toString());
+
+        // Show the elapsed game time, wheel power, and capturing power
+        telemetry.addData("Le StAtUs", "Le InitIaliZation TiMe: " + runtime.toString());
+
+        //telemetry.addData("Status","Finished. Now cut me some slack.");
+    }
+    //back left is only motor that spins the correct direction
+    public void DriveForward(double power){
+        leftDrive.setPower(power);
+        rightDrive.setPower(power);
+        back_leftDrive.setPower(-power);
+        back_rightDrive.setPower(power);
+    }
+    public void DriveForwardTime(double power, long time){
+        DriveForward(power);
+        sleep(time);
+    }
+    public void StopDriving(){
+        DriveForward(0);
+    }
+    public void TurnLeft(double power){
+        leftDrive.setPower(-power);
+        rightDrive.setPower(power);
+        back_leftDrive.setPower(power);
+        back_rightDrive.setPower(power);
+    }
+    public void TurnLeftTime(double power, long time){
+        TurnLeft(power);
+        sleep(time);
+    }
+    public void TurnRight(double power){
+        leftDrive.setPower(power);
+        rightDrive.setPower(-power);
+        back_leftDrive.setPower(-power);
+        back_rightDrive.setPower(-power);
+    }
+    public void TurnRightTime(double power, long time) {
+        TurnRight(power);
+        sleep(time);
+    }
+    public void LiftDown(double power, long time){
+        lift.setPower(power);
+
+    }
+    public void GripOpen(double power, long time){
+        grip.setPosition(100);
+    }
+
+}
