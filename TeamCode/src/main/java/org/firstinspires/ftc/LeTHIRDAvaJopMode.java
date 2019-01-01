@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.util.Range;
 
 /**
  working version
-
+    no grip yet
  */
 
 @TeleOp(name="Le THIRD AvA jOp Mode", group="Iterative Opmode")
@@ -29,10 +29,11 @@ public class LeTHIRDAvaJopMode extends OpMode
     private DcMotor rightDrive = null;
     private DcMotor back_leftDrive = null;
     private DcMotor back_rightDrive = null;
-    //private DcMotor arm = null;
+    private DcMotor arm = null;
     //private CRServo capturing = null;
     //private Servo grip = null;
-    //private DcMotor lift = null;
+    private DcMotor lift = null;
+    private DcMotor extension = null;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -48,16 +49,17 @@ public class LeTHIRDAvaJopMode extends OpMode
         rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
         back_leftDrive  = hardwareMap.get(DcMotor.class, "back_left_drive");
         back_rightDrive = hardwareMap.get(DcMotor.class, "back_right_drive");
-        //arm        = hardwareMap.get(DcMotor.class, "arm");
+        arm        = hardwareMap.get(DcMotor.class, "arm");
         //capturing = hardwareMap.get(CRServo.class, "capturing");
-        //lift = hardwareMap.get(DcMotor.class, "lift");
+        lift = hardwareMap.get(DcMotor.class, "lift");
         //grip = hardwareMap.get(Servo.class, "grip");
+        extension = hardwareMap.get(DcMotor.class, "extension");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
-        //arm.setDirection(DcMotor.Direction.FORWARD);
+        arm.setDirection(DcMotor.Direction.FORWARD);
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Le Status", "is very Initialization");
@@ -75,13 +77,18 @@ public class LeTHIRDAvaJopMode extends OpMode
         double rightPower;
         double backleftPower;
         double backrightPower;
-        //boolean button_up = gamepad2.a;             //a and b for arm
-        //boolean button_down = gamepad2.b;
-        //boolean button_press = gamepad2.x;          //x is up
-        //boolean reverse_button_press = gamepad2.y;  //y is down
+        boolean button_up = gamepad2.a;             //a and b for arm
+        boolean button_down = gamepad2.b;
+        boolean button_press = gamepad2.x;          //x is lift up
+        boolean reverse_button_press = gamepad2.y;  //y is lift down
         //boolean button_grip_close = gamepad2.left_bumper; //grip open
         //boolean button_grip_open = gamepad2.right_bumper; //grip close
-        //float arm_slow = gamepad2.right_trigger; //slows down arm
+        float arm_slow = gamepad2.right_trigger; //slows down arm
+        float extension_slow = gamepad2.left_trigger; //slows down arm extension
+        boolean arm_preset_up = gamepad2.dpad_up; //press dpad up to do arm preset up
+        boolean arm_preset_down = gamepad2.dpad_down; //press dpad down to do arm preset down
+        double extensionPower = gamepad2.left_stick_y; //arm extender
+
 
         //float capturing_power = gamepad2.left_trigger; //left trigger for capturing power
         double drive  = -gamepad1.left_stick_y; //up and down values
@@ -92,14 +99,12 @@ public class LeTHIRDAvaJopMode extends OpMode
         boolean downright = gamepad1.right_bumper;
         boolean downleft = gamepad1.left_bumper;
 
-
-        //boolean arm_preset_up = gamepad2.dpad_up; //press dpad up to do arm preset up
-        //boolean arm_preset_down = gamepad2.dpad_down; //press dpad down to do arm preset down
-
         leftPower        = Range.clip(drive + strafe + rotate, -0.5, 0.5) ;
         rightPower       = Range.clip(drive - strafe - rotate, -0.5, 0.5) ;
         backleftPower    = Range.clip(drive - strafe + rotate, -0.5, 0.5) ;
         backrightPower   = Range.clip(drive + strafe - rotate, -0.5, 0.5) ;
+
+        extension.setPower(extensionPower/2);
 
         //stupid and inefficient if statements
 
@@ -123,19 +128,20 @@ public class LeTHIRDAvaJopMode extends OpMode
         capturing.setPower(capturing_power * -200); //capturing power
 
         float capturingPower = (capturing_power * -200);
-
+        */
         int time;
         time = 250;
         if(arm_slow > 0){
-
-
             arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
-        /**
-         * ARM PRESET UP
+        if(extension_slow > 0) {
+            extension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
+
+        //ARM PRESET UP
 
         if(arm_preset_up == true){
-            arm.setPower(-25);
+            arm.setPower(-0.5);
             try{
                 java.lang.Thread.sleep(550);
             }catch(InterruptedException ie){
@@ -143,11 +149,10 @@ public class LeTHIRDAvaJopMode extends OpMode
             }
             arm.setPower(0);
         }
-        /**
-         * ARM PRESET DOWN
+        //ARM PRESET DOWN
 
         if(arm_preset_down == true){
-            arm.setPower(25);
+            arm.setPower(0.5);
             try{
                 java.lang.Thread.sleep(400);
             }catch(InterruptedException ie){
@@ -161,11 +166,10 @@ public class LeTHIRDAvaJopMode extends OpMode
             }
             arm.setPower(0);
         }
-        /**
-         * LIFT
+        //LIFT
 
         if (button_press == true) {
-            lift.setPower(1000);
+            lift.setPower(1);
             //try and catch code
             try{
                 java.lang.Thread.sleep(time);
@@ -176,7 +180,7 @@ public class LeTHIRDAvaJopMode extends OpMode
             lift.setPower(0);
         }
         if (reverse_button_press == true) {
-            lift.setPower(-1000);
+            lift.setPower(-1);
             //try and catch code
             try{
                 java.lang.Thread.sleep(time);
@@ -185,12 +189,11 @@ public class LeTHIRDAvaJopMode extends OpMode
             }
             //end of try and catch code
             lift.setPower(0);
-            /**
-             * ARM
+            // ARM
 
         }
         if (button_up == true) {
-            arm.setPower(150);
+            arm.setPower(0.5);
             //try and catch code
             try{
                 java.lang.Thread.sleep(time);
@@ -201,7 +204,7 @@ public class LeTHIRDAvaJopMode extends OpMode
             arm.setPower(0);
         }
         if (button_down == true) {
-            arm.setPower(-150);
+            arm.setPower(-0.5);
             //try and catch code
             try{
                 java.lang.Thread.sleep(time);
@@ -239,9 +242,7 @@ public class LeTHIRDAvaJopMode extends OpMode
     /*
      * Code to run ONCE after the driver hits STOP
      */
-    @Override
-    public void stop() {
-    }
+
 
 }
 //AQikMer/////AAABmQpFKno5UkD8ttfhJ5GRkmZdjeCp3jXXK0tXD4AOMCyQfQ7JufK5eQFX5/NKh0gL5PGgfU9y869kiL6AwKNX6SiGYkQasSnZSX4NehCseeQcxBkcwsksMBdCPSzK/m0zn3JNJWR3BP1cFOA5obzaP9UdUmN/ANV1T7tPSKkt2uf4qseDo3CcvA2JCW7zihI3DGg3Eq52wyziSMsFBM7NhZagUPy4SsdDd9KCOiPiD0VRE4ncmelAfAZQW0eOpid5izuLv9AS2Re2gKFAwOBtXydlfw1P0Pv4Q+guIBcgAofXFYRkNziJ6dqLF8XecT6Ocn4cykqnahj1OepN66iMhhdXMa4o9N/r8QezDTi5BEun
