@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -30,12 +31,12 @@ public class JopMode extends OpMode  {
     private DcMotor rightDrive = null;
     private DcMotor back_leftDrive = null;
     private DcMotor back_rightDrive = null;
-    private DcMotor arm = null;
-    private DcMotor arm2 = null;
-    private CRServo capturing = null;
-    //private Servo grip = null;
+    private DcMotor intake_left = null;
+    private DcMotor intake_right = null;
     private DcMotor lift = null;
-    private DcMotor extension = null;
+    private Servo grip = null;
+    private Servo rv = null;
+
 
     /*
     initialization
@@ -47,18 +48,21 @@ public class JopMode extends OpMode  {
         rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
         back_leftDrive  = hardwareMap.get(DcMotor.class, "back_left_drive");
         back_rightDrive = hardwareMap.get(DcMotor.class, "back_right_drive");
-        arm        = hardwareMap.get(DcMotor.class, "arm");
-        arm2       = hardwareMap.get(DcMotor.class, "arm2");
-        capturing = hardwareMap.get(CRServo.class, "capturing");
+        intake_left = hardwareMap.get(DcMotor.class, "intake_left");
+        intake_right = hardwareMap.get(DcMotor.class, "intake_right");
         lift = hardwareMap.get(DcMotor.class, "lift");
-        //grip = hardwareMap.get(Servo.class, "grip");
-        extension = hardwareMap.get(DcMotor.class, "extension");
+        grip = hardwareMap.get(Servo.class, "grip");
+        rv = hardwareMap.get(Servo.class,"rv");
+
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
-        arm.setDirection(DcMotor.Direction.FORWARD);
+        intake_left.setDirection(DcMotor.Direction.FORWARD);
+        intake_right.setDirection((DcMotor.Direction.REVERSE));
+
+
 
         // Tell the driver that initialization is complete.
         telemetry.addData( "Status: ", "Successfully Initialized .-.");
@@ -92,21 +96,21 @@ public class JopMode extends OpMode  {
         double rightpercentPower;
         double backleftpercentPower;
         double backrightpercentPower;
-        boolean button_up = gamepad2.a;             //a and b for arm
-        boolean button_down = gamepad2.b;
-        boolean button_press = gamepad2.x;          //x is lift up
-        boolean reverse_button_press = gamepad2.y;  //y is lift down
-        //boolean button_grip_close = gamepad2.left_bumper; //grip open
-        //boolean button_grip_open = gamepad2.right_bumper; //grip close
+        boolean grip_close = gamepad2.a;
+        boolean grip_open = gamepad2.b;
+        boolean rv_left = gamepad2.x;
+        boolean rv_right = gamepad2.y;
+        float intake_in = gamepad2.right_trigger;
+        float intake_out = gamepad2.left_trigger;
+        double lift = gamepad2.left_stick_y;
+        double rv = gamepad2.right_stick_x;
 
-        float arm_slow = gamepad2.right_trigger; //slows down arm
-        float extension_slow = gamepad2.left_trigger; //slows down arm extension
-        boolean arm_preset_up = gamepad2.dpad_up; //press dpad up to do arm preset up
-        boolean arm_preset_down = gamepad2.dpad_down; //press dpad down to do arm preset down
-        double armPower = gamepad2.left_stick_y; //arm extender
-        float capturing_power = gamepad2.left_trigger; //left trigger for capturing power
-        float reverse_capturing = gamepad2.right_trigger; //right trigger to reverse capturing
-        double extensionPower = gamepad2.right_stick_y;
+
+        boolean button_grip_close = gamepad2.left_bumper;
+        boolean button_grip_open = gamepad2.right_bumper;
+        boolean arm_preset_up = gamepad2.dpad_up;
+        boolean arm_preset_down = gamepad2.dpad_down;
+
 
         double drive  = -gamepad1.left_stick_y; //up and down values
         double strafe =  gamepad1.left_stick_x; //side to side values
@@ -130,128 +134,6 @@ public class JopMode extends OpMode  {
         backrightPower   = Range.clip(drive + strafe + rotate,  -1.5+(getBatteryVoltage()/13), 1.5-(getBatteryVoltage()/13)) ;
         backrightpercentPower =  Range.clip(drive + strafe + rotate,  -1.0, 1.0) ;
 
-        /*
-        arm.setPower(armPower);
-        arm2.setPower(-armPower);
-        extension.setPower(-extensionPower/1.5);
-
-
-        //stupid and inefficient if statements
-
-        //two wheel drive
-        if(leftmotor>0) {
-            leftDrive.setPower(-leftmotor);
-            back_leftDrive.setPower(-leftmotor);
-            telemetry.addData("2 Wheel Drive Activated","Left Wheels");
-        }
-        if(rightmotor>0) {
-            rightDrive.setPower(-rightmotor);
-            back_rightDrive.setPower(rightmotor);
-            telemetry.addData("2 Wheel Drive Activated","Right Wheels");
-        }
-        if(reverse_leftmotor==true) {
-            leftDrive.setPower(1);
-            back_leftDrive.setPower(1);
-            telemetry.addData("Reverse","Left Wheels");
-        }
-        if(reverse_rightmotor==true) {
-            rightDrive.setPower(1);
-            back_rightDrive.setPower(-1);
-            telemetry.addData("Reverse","Right Wheels");
-        }
-
-
-        capturing.setPower(reverse_capturing-capturing_power); //capturing power
-
-
-        float capturingPower = (-capturing_power + reverse_capturing);
-
-        int time;
-        time = 1;
-        if(arm_slow > 0){
-            arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        }
-        if(extension_slow > 0) {
-            extension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        }
-
-        //ARM PRESET UP
-
-        if(arm_preset_up == true){
-            telemetry.addData("Eddie"," is a thot");
-        }
-        //ARM PRESET DOWN
-
-        if(arm_preset_down == true){
-            telemetry.addData("Gained"," Down Syndrome!");
-        }
-        //LIFT
-
-        if (button_press == true) {
-            lift.setPower(1);
-            //try and catch code
-            try{
-                java.lang.Thread.sleep(time);
-            }catch(InterruptedException ie){
-
-            }
-            //end of try and catch code
-            lift.setPower(0);
-        }
-        if (reverse_button_press == true) {
-            lift.setPower(-1);
-            //try and catch code
-            try{
-                java.lang.Thread.sleep(time);
-            }catch(InterruptedException ie){
-
-            }
-            //end of try and catch code
-            lift.setPower(0);
-            // ARM
-
-        }
-        */
-
-
-        /**
-         if (button_up == true) {
-         extension.setPower(1);
-
-         //try and catch code
-         try{
-         java.lang.Thread.sleep(time);
-         }catch(InterruptedException ie){
-
-         }
-         //end of try and catch code
-         extension.setPower(0);
-         }
-         if (button_down == true) {
-         extension.setPower(-1);
-
-         //try and catch code
-         try{
-         java.lang.Thread.sleep(time);
-         }catch(InterruptedException ie){
-
-         }
-         //end of try and catch code
-         extension.setPower(0);
-
-         }
-         */
-        /**
-         * grip
-
-         if (button_grip_open == true) {
-         grip.setPosition(100); // Grip close right bumper
-
-         }
-         if (button_grip_close == true) {
-         grip.setPosition(0); // Grip open
-         }
-         */
 
         // Send calculated power to wheels
         leftDrive.setPower(-leftPower);
