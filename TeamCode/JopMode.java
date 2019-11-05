@@ -114,7 +114,6 @@ public class JopMode extends OpMode  {
         double rightpercentPower;
         double backleftpercentPower;
         double backrightpercentPower;
-        double finePos = 0;
 
 
         //gamepad 2
@@ -128,8 +127,7 @@ public class JopMode extends OpMode  {
 
         boolean fineleft = gamepad2.left_bumper;
         boolean fineright = gamepad2.right_bumper;
-        boolean arm_preset_up = gamepad2.dpad_up;
-        boolean arm_preset_down = gamepad2.dpad_down;
+
 
         //gamepad 1
         double drive  = -gamepad1.left_stick_y; //up and down values
@@ -139,8 +137,14 @@ public class JopMode extends OpMode  {
         boolean intakePdown = gamepad1.dpad_down;
         boolean intakePup = gamepad1.dpad_up;
         double intakeOut = gamepad1.right_trigger;
-        boolean rightgrab = gamepad1.right_bumper;
-        boolean leftgrab = gamepad1.left_bumper;
+        
+        //rough aka rv
+        double roughPos = rough.getPosition();
+        rough.setPosition(roughPos+=(rv*10));
+        
+        //fine servo
+        double finePos = fine.getPosition();
+        
 
         //intake power
         if(intakePup){
@@ -149,15 +153,7 @@ public class JopMode extends OpMode  {
         if(intakePdown){
             intakeCurrentPower-=0.25;
         }
-
-        //fine servo
-        if(fineright){
-            finePos-=45;
-        }
-        if(fineleft){
-            finePos=+45;
-        }
-        fine.setPosition(finePos);
+        
 
         //intake
         if(intakeOut>0){
@@ -169,20 +165,6 @@ public class JopMode extends OpMode  {
             intake_left.setPower(-intakePower * intakeCurrentPower);
         }
 
-        //block grabber
-        if(rightgrab){
-            grab_right.setPosition(0);
-        }
-        else{
-            grab_right.setPosition(90);
-        }
-
-        if(leftgrab){
-            grab_left.setPosition(0);
-        }
-        else{
-            grab_left.setPosition(90);
-        }
 
         //grip
         if(grab>0.5){
@@ -198,8 +180,10 @@ public class JopMode extends OpMode  {
             try { Thread.sleep(1000); } catch (InterruptedException e) { }
             rough.setPosition(90);
             lift.setPower(0);
-
         }
+        
+        //lift
+        lift.setPower(liftPower);
 
         //POWER SETTING
 
@@ -229,7 +213,8 @@ public class JopMode extends OpMode  {
         telemetry.addData("Le Voltage", "(%.2f) V", getBatteryVoltage());
         telemetry.addData("Le Intake Power", "(%.2f)", intakePower);
         telemetry.addData("Max Intake Power", "(%.2f)", intakeCurrentPower);
-        //telemetry.addData("Le Capturing", "Capturing Power: (%.2f)", capturingPower);
+        telemetry.addData("Rough Pos", " (%.2f)", roughPos);
+        telemetry.addData("Fine Pos","(.2f)", finePos);
 
         //sensor range stuff
         //telemetry.addData("deviceName",sensorRange.getDeviceName() );
