@@ -16,13 +16,19 @@ import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
+import java.util.Locale;
 
 /**
  working version
  no more grip
  */
 
-@TeleOp(name="JopMode", group="Opmode")
+@TeleOp
+        //(name="JopMode", group="Opmode")
 //@Disabled
 public class JopMode extends OpMode  {
     // Declare motors and servos
@@ -35,7 +41,13 @@ public class JopMode extends OpMode  {
     private DcMotor intake_right = null;
     private DcMotor lift = null;
     private Servo grip = null;
-    private Servo rv = null;
+    private Servo fine = null;
+    private Servo rough = null;
+    private Servo grab_right = null;
+    private Servo grab_left = null;
+    double intakeCurrentPower=1.00;
+    private DistanceSensor sensorRange;
+    private Rev2mDistanceSensor sensorTimeOfFlight;
 
 
     /*
@@ -52,19 +64,25 @@ public class JopMode extends OpMode  {
         intake_right = hardwareMap.get(DcMotor.class, "intake_right");
         lift = hardwareMap.get(DcMotor.class, "lift");
         grip = hardwareMap.get(Servo.class, "grip");
-        rv = hardwareMap.get(Servo.class,"rv");
+        fine = hardwareMap.get(Servo.class,"fine");
+        rough = hardwareMap.get(Servo.class,"rough");
+        grab_right = hardwareMap.get(Servo.class,"dad_right");
+        grab_left = hardwareMap.get(Servo.class,"dad_left");
+
+        //sensorRange = hardwareMap.get(DistanceSensor.class, "sensor_range");
 
 
-        // Most robots need the motor on one side to be reversed to drive forward
-        // Reverse the motor that runs backwards when connected directly to the battery
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
-        intake_left.setDirection(DcMotor.Direction.FORWARD);
-        intake_right.setDirection((DcMotor.Direction.REVERSE));
+        back_leftDrive.setDirection(DcMotor.Direction.FORWARD);
+        back_rightDrive.setDirection(DcMotor.Direction.FORWARD);
+        //intake_left.setDirection(DcMotor.Direction.FORWARD);
+        //intake_right.setDirection((DcMotor.Direction.REVERSE));
 
+        //sensorTimeOfFlight = (Rev2mDistanceSensor)sensorRange;
 
-
-        // Tell the driver that initialization is complete.
+        //initialization is complete.
+        //killmenow
         telemetry.addData( "Status: ", "Successfully Initialized .-.");
     }
     @Override
@@ -96,29 +114,92 @@ public class JopMode extends OpMode  {
         double rightpercentPower;
         double backleftpercentPower;
         double backrightpercentPower;
-        boolean grip_close = gamepad2.a;
-        boolean grip_open = gamepad2.b;
-        boolean rv_left = gamepad2.x;
-        boolean rv_right = gamepad2.y;
-        float intake_in = gamepad2.right_trigger;
-        float intake_out = gamepad2.left_trigger;
-        double lift = gamepad2.left_stick_y;
+        double finePos = 0;
+
+
+        //gamepad 2
+        boolean everything = gamepad2.a;
+        boolean rveverything = gamepad2.b;
+        double grab = gamepad2.left_trigger;
+        double ungrab = gamepad2.right_trigger;
+        double liftPower = gamepad2.left_stick_y;
         double rv = gamepad2.right_stick_x;
 
 
-        boolean button_grip_close = gamepad2.left_bumper;
-        boolean button_grip_open = gamepad2.right_bumper;
+        boolean fineleft = gamepad2.left_bumper;
+        boolean fineright = gamepad2.right_bumper;
         boolean arm_preset_up = gamepad2.dpad_up;
         boolean arm_preset_down = gamepad2.dpad_down;
 
-
+        //gamepad 1
         double drive  = -gamepad1.left_stick_y; //up and down values
-        double strafe =  gamepad1.left_stick_x; //side to side values
+        double strafe =  -gamepad1.left_stick_x; //side to side values
         double rotate = -gamepad1.right_stick_x;
-        double rightmotor = gamepad1.right_trigger;
-        double leftmotor = gamepad1.left_trigger;
-        boolean reverse_rightmotor = gamepad1.right_bumper;
-        boolean reverse_leftmotor = gamepad1.left_bumper;
+        double intakePower = gamepad1.left_trigger;
+        boolean intakePdown = gamepad1.dpad_down;
+        boolean intakePup = gamepad1.dpad_up;
+        double intakeOut = gamepad1.right_trigger;
+        boolean rightgrab = gamepad1.right_bumper;
+        boolean leftgrab = gamepad1.left_bumper;
+
+        //intake power
+        if(intakePup){
+            intakeCurrentPower+=0.25;
+        }
+        if(intakePdown){
+            intakeCurrentPower-=0.25;
+        }
+
+        //fine servo
+        if(fineright){
+            finePos-=45;
+        }
+        if(fineleft){
+            finePos=+45;
+        }
+        fine.setPosition(finePos);
+
+        //intake
+        if(intakeOut>0){
+            intake_right.setPower(-intakeOut * intakeCurrentPower);
+            intake_left.setPower(intakeOut * intakeCurrentPower);
+        }
+        else {
+            intake_right.setPower(intakePower * intakeCurrentPower);
+            intake_left.setPower(-intakePower * intakeCurrentPower);
+        }
+
+        //block grabber
+        if(rightgrab){
+            grab_right.setPosition(0);
+        }
+        else{
+            grab_right.setPosition(90);
+        }
+
+        if(leftgrab){
+            grab_left.setPosition(0);
+        }
+        else{
+            grab_left.setPosition(90);
+        }
+
+        //grip
+        if(grab>0.5){
+            grip.setPosition(0);
+        }
+        else if(ungrab>0.5){
+            grip.setPosition(90);
+        }
+
+        //the everything
+        if(everything){
+            lift.setPower(-1);
+            try { Thread.sleep(1000); } catch (InterruptedException e) { }
+            rough.setPosition(90);
+            lift.setPower(0);
+
+        }
 
         //POWER SETTING
 
@@ -146,7 +227,17 @@ public class JopMode extends OpMode  {
         telemetry.addData("Front Motors", "Left Motor Power: (%.2f)  Right Motor Power (%.2f)", leftpercentPower*100, rightpercentPower*100);
         telemetry.addData("Back Motors", "Back Left Motor Power: (%.2f) Back Right Motor Power (%.2f)", backleftpercentPower*100, backrightpercentPower*100);
         telemetry.addData("Le Voltage", "(%.2f) V", getBatteryVoltage());
+        telemetry.addData("Le Intake Power", "(%.2f)", intakePower);
+        telemetry.addData("Max Intake Power", "(%.2f)", intakeCurrentPower);
         //telemetry.addData("Le Capturing", "Capturing Power: (%.2f)", capturingPower);
+
+        //sensor range stuff
+        //telemetry.addData("deviceName",sensorRange.getDeviceName() );
+        //telemetry.addData("range", String.format(Locale.US, "%.01f cm", sensorRange.getDistance(DistanceUnit.CM)));
+        // Rev2mDistanceSensor specific methods.
+        //telemetry.addData("ID", String.format("%x", sensorTimeOfFlight.getModelID()));
+        //telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlight.didTimeoutOccur()));
+
     }
 
 
