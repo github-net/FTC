@@ -49,6 +49,13 @@ public class JopMode extends OpMode  {
     private DistanceSensor sensorRange;
     private Rev2mDistanceSensor sensorTimeOfFlight;
 
+    static final double INCREMENT   = 0.1;     // amount to slew servo each CYCLE_MS cycle
+    static final int    CYCLE_MS    =   50;     // period of each cycle
+    static final double MAX_POS     =  1.0;     // Maximum rotational position
+    static final double MIN_POS     =  0.0;     // Minimum rotational position
+    double  roughposition = (MAX_POS - MIN_POS) / 2; // Start at halfway position
+    double fineposition= (MAX_POS - MIN_POS) / 2;
+
 
     /*
     initialization
@@ -123,11 +130,8 @@ public class JopMode extends OpMode  {
         double ungrab = gamepad2.right_trigger;
         double liftPower = gamepad2.left_stick_y;
         double rv = gamepad2.right_stick_x;
-
-
-        boolean fineleft = gamepad2.left_bumper;
-        boolean fineright = gamepad2.right_bumper;
-
+        boolean fineleft = gamepad2.dpad_left;
+        boolean fineright = gamepad2.dpad_right;
 
         //gamepad 1
         double drive  = -gamepad1.left_stick_y; //up and down values
@@ -137,23 +141,54 @@ public class JopMode extends OpMode  {
         boolean intakePdown = gamepad1.dpad_down;
         boolean intakePup = gamepad1.dpad_up;
         double intakeOut = gamepad1.right_trigger;
-        
+
         //rough aka rv
-        double roughPos = rough.getPosition();
-        rough.setPosition(roughPos+=(rv*10));
-        
-        //fine servo
-        double finePos = fine.getPosition();
-        
+
+        if (rv>0) {
+            // Keep stepping up until we hit the max value.
+            roughposition += INCREMENT ;
+            if (roughposition >= MAX_POS ) {
+                roughposition = MAX_POS;
+
+            }
+        }
+        else if(rv<0){
+            // Keep stepping down until we hit the min value.
+            roughposition -= INCREMENT ;
+            if (roughposition <= MIN_POS ) {
+                roughposition = MIN_POS;
+            }
+        }
+        rough.setPosition(roughposition*90);
+
+        if (fineleft) {
+            // Keep stepping up until we hit the max value.
+            roughposition += INCREMENT ;
+            if (roughposition >= MAX_POS ) {
+                roughposition = MAX_POS;
+
+            }
+        }
+        else if(fineright){
+            // Keep stepping down until we hit the min value.
+            fineposition -= INCREMENT ;
+            if (fineposition <= MIN_POS ) {
+                fineposition = MIN_POS;
+            }
+        }
+        fine.setPosition(fineposition*90);
+
+
+//i wanna commit parentheses genocide
 
         //intake power
-        if(intakePup){
+        if(intakePup&&intakeCurrentPower!=1){
             intakeCurrentPower+=0.25;
         }
-        if(intakePdown){
+        if(intakePdown&&intakeCurrentPower!=0){
             intakeCurrentPower-=0.25;
         }
-        
+
 
         //intake
         if(intakeOut>0){
@@ -176,14 +211,13 @@ public class JopMode extends OpMode  {
 
         //the everything
         if(everything){
-            lift.setPower(-1);
-            try { Thread.sleep(1000); } catch (InterruptedException e) { }
-            rough.setPosition(90);
+            //lift.setPower(1);
+            try { Thread.sleep(500); } catch (InterruptedException e) { }
             lift.setPower(0);
         }
-        
+
         //lift
-        lift.setPower(liftPower);
+        lift.setPower(liftPower*0.5);
 
         //POWER SETTING
 
@@ -213,8 +247,8 @@ public class JopMode extends OpMode  {
         telemetry.addData("Le Voltage", "(%.2f) V", getBatteryVoltage());
         telemetry.addData("Le Intake Power", "(%.2f)", intakePower);
         telemetry.addData("Max Intake Power", "(%.2f)", intakeCurrentPower);
-        telemetry.addData("Rough Pos", " (%.2f)", roughPos);
-        telemetry.addData("Fine Pos","(.2f)", finePos);
+        telemetry.addData("Rough Pos", " (%.2f)", roughposition);
+        telemetry.addData("Fine Pos","(%.2f)", fineposition);
 
         //sensor range stuff
         //telemetry.addData("deviceName",sensorRange.getDeviceName() );
