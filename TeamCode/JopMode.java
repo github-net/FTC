@@ -45,16 +45,18 @@ public class JopMode extends OpMode  {
     private Servo rough = null;
     private Servo grab_right = null;
     private Servo grab_left = null;
+    private Servo blockstick = null;
     double intakeCurrentPower=1.00;
     private DistanceSensor sensorRange;
     private Rev2mDistanceSensor sensorTimeOfFlight;
 
-    static final double INCREMENT   = 0.1;     // amount to slew servo each CYCLE_MS cycle
+    static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
     static final int    CYCLE_MS    =   50;     // period of each cycle
     static final double MAX_POS     =  1.0;     // Maximum rotational position
     static final double MIN_POS     =  0.0;     // Minimum rotational position
-    double  roughposition = (MAX_POS - MIN_POS) / 2; // Start at halfway position
-    double fineposition= (MAX_POS - MIN_POS) / 2;
+    double  roughposition = 1.0;
+    double fineposition= 0.37;
+    double blockstickposition = 0.0;
 
 
     /*
@@ -75,6 +77,7 @@ public class JopMode extends OpMode  {
         rough = hardwareMap.get(Servo.class,"rough");
         grab_right = hardwareMap.get(Servo.class,"dad_right");
         grab_left = hardwareMap.get(Servo.class,"dad_left");
+        blockstick = hardwareMap.get(Servo.class, "blockstick");
 
         //sensorRange = hardwareMap.get(DistanceSensor.class, "sensor_range");
 
@@ -83,6 +86,12 @@ public class JopMode extends OpMode  {
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
         back_leftDrive.setDirection(DcMotor.Direction.FORWARD);
         back_rightDrive.setDirection(DcMotor.Direction.FORWARD);
+        fine.setDirection(Servo.Direction.FORWARD);
+        rough.setDirection(Servo.Direction.FORWARD);
+        grip.setDirection(Servo.Direction.REVERSE);
+        blockstick.setDirection(Servo.Direction.FORWARD);
+        grab_left.setDirection(Servo.Direction.FORWARD);
+
         //intake_left.setDirection(DcMotor.Direction.FORWARD);
         //intake_right.setDirection((DcMotor.Direction.REVERSE));
 
@@ -126,8 +135,7 @@ public class JopMode extends OpMode  {
         //gamepad 2
         boolean everything = gamepad2.a;
         boolean rveverything = gamepad2.b;
-        double grab = gamepad2.left_trigger;
-        double ungrab = gamepad2.right_trigger;
+        boolean Grip = gamepad2.x;
         double liftPower = gamepad2.left_stick_y;
         double rv = gamepad2.right_stick_x;
         boolean fineleft = gamepad2.dpad_left;
@@ -141,31 +149,57 @@ public class JopMode extends OpMode  {
         boolean intakePdown = gamepad1.dpad_down;
         boolean intakePup = gamepad1.dpad_up;
         double intakeOut = gamepad1.right_trigger;
+        boolean blockstickdown = gamepad1.a;
 
+        //temp dadder (left = 0.4)
+        double grabPos = grab_left.getPosition();
+        boolean grableftup = gamepad1.dpad_up;
+        boolean grableftdown = gamepad1.dpad_down;
+        if(grableftup&&(grabPos<1)){
+            grabPos+=0.01;
+        }
+        if(grableftdown&&(grabPos>0)){
+            grabPos-=0.01;
+        }
+        grab_left.setPosition(grabPos);
+
+        //blockstick
+        if(blockstickdown){
+            blockstick.setPosition(1);
+        }
+        else {
+            blockstick.setPosition(0.0);
+        }
+        blockstickposition=blockstick.getPosition();
         //rough aka rv
-
         if (rv>0) {
             // Keep stepping up until we hit the max value.
-            roughposition += INCREMENT ;
-            if (roughposition >= MAX_POS ) {
+            roughposition += 0.72 ;
+            if (roughposition >= 1 ) {
                 roughposition = MAX_POS;
 
             }
         }
         else if(rv<0){
-            // Keep stepping down until we hit the min value.
-            roughposition -= INCREMENT ;
-            if (roughposition <= MIN_POS ) {
+
+            roughposition -= 0.72 ;
+            if (roughposition <= 0.28 ) {
                 roughposition = MIN_POS;
             }
         }
-        rough.setPosition(roughposition*90);
+        else if (rv==0){
+
+        }
+        if(roughposition<0.28){
+            roughposition=0.28;
+        }
+        rough.setPosition(roughposition);
 
         if (fineleft) {
             // Keep stepping up until we hit the max value.
-            roughposition += INCREMENT ;
-            if (roughposition >= MAX_POS ) {
-                roughposition = MAX_POS;
+            fineposition += INCREMENT ;
+            if (fineposition >= MAX_POS ) {
+                fineposition = MAX_POS;
 
             }
         }
@@ -175,17 +209,18 @@ public class JopMode extends OpMode  {
             if (fineposition <= MIN_POS ) {
                 fineposition = MIN_POS;
             }
+
         }
-        fine.setPosition(fineposition*90);
+        fine.setPosition(fineposition);
 
 
 //i wanna commit parentheses genocide
 
         //intake power
-        if(intakePup&&intakeCurrentPower!=1){
+        if(intakePup==true&&(intakeCurrentPower!=1)){
             intakeCurrentPower+=0.25;
         }
-        if(intakePdown&&intakeCurrentPower!=0){
+        if(intakePdown==true&&(intakeCurrentPower!=0)){
             intakeCurrentPower-=0.25;
         }
 
@@ -202,11 +237,12 @@ public class JopMode extends OpMode  {
 
 
         //grip
-        if(grab>0.5){
+        if(Grip==true){
             grip.setPosition(0);
+
         }
-        else if(ungrab>0.5){
-            grip.setPosition(90);
+        else if(Grip==false){
+            grip.setPosition(0.75);
         }
 
         //the everything
@@ -218,6 +254,9 @@ public class JopMode extends OpMode  {
 
         //lift
         lift.setPower(liftPower*0.5);
+        if(liftPower==0){
+            lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
 
         //POWER SETTING
 
@@ -241,7 +280,7 @@ public class JopMode extends OpMode  {
         back_rightDrive.setPower(backrightPower);
 
         // Show the elapsed game time, wheel power, and capturing power
-        telemetry.addData("Initialization time", " :" + runtime.toString());
+        telemetry.addData("Initialization time", ":" + runtime.toString());
         telemetry.addData("Front Motors", "Left Motor Power: (%.2f)  Right Motor Power (%.2f)", leftpercentPower*100, rightpercentPower*100);
         telemetry.addData("Back Motors", "Back Left Motor Power: (%.2f) Back Right Motor Power (%.2f)", backleftpercentPower*100, backrightpercentPower*100);
         telemetry.addData("Le Voltage", "(%.2f) V", getBatteryVoltage());
@@ -249,6 +288,9 @@ public class JopMode extends OpMode  {
         telemetry.addData("Max Intake Power", "(%.2f)", intakeCurrentPower);
         telemetry.addData("Rough Pos", " (%.2f)", roughposition);
         telemetry.addData("Fine Pos","(%.2f)", fineposition);
+        telemetry.addData("Block Stick Position","(%.2f)", blockstickposition);
+        telemetry.addData("Grabber Position", "(%.2f)", grabPos);
+
 
         //sensor range stuff
         //telemetry.addData("deviceName",sensorRange.getDeviceName() );
