@@ -54,7 +54,7 @@ public class JopMode extends OpMode  {
     static final int    CYCLE_MS    =   50;     // period of each cycle
     static final double MAX_POS     =  1.0;     // Maximum rotational position
     static final double MIN_POS     =  0.0;     // Minimum rotational position
-    double  roughposition = 1.0;
+    double  roughposition = 0.28;
     double fineposition= 0.37;
     double blockstickposition = 0.0;
 
@@ -174,7 +174,7 @@ public class JopMode extends OpMode  {
         //rough aka rv
         if (rv>0) {
             // Keep stepping up until we hit the max value.
-            roughposition += 0.72 ;
+            roughposition += 0.72 ; //quarter: 18 third: 24 half: 36
             if (roughposition >= 1 ) {
                 roughposition = MAX_POS;
 
@@ -182,7 +182,7 @@ public class JopMode extends OpMode  {
         }
         else if(rv<0){
 
-            roughposition -= 0.72 ;
+            roughposition -= 0.72 ; //quarter: 18 third: 24 half: 36
             if (roughposition <= 0.28 ) {
                 roughposition = MIN_POS;
             }
@@ -242,7 +242,7 @@ public class JopMode extends OpMode  {
 
         }
         else if(Grip==false){
-            grip.setPosition(0.75);
+            grip.setPosition(1);
         }
 
         //the everything
