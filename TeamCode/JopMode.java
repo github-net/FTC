@@ -43,8 +43,8 @@ public class JopMode extends OpMode  {
     private Servo grip = null;
     private Servo fine = null;
     private Servo rough = null;
-    private Servo grab_right = null;
-    private Servo grab_left = null;
+    private Servo dad_right = null;
+    private Servo dad_left = null;
     private Servo blockstick = null;
     double intakeCurrentPower=1.00;
     private DistanceSensor sensorRange;
@@ -75,8 +75,8 @@ public class JopMode extends OpMode  {
         grip = hardwareMap.get(Servo.class, "grip");
         fine = hardwareMap.get(Servo.class,"fine");
         rough = hardwareMap.get(Servo.class,"rough");
-        grab_right = hardwareMap.get(Servo.class,"dad_right");
-        grab_left = hardwareMap.get(Servo.class,"dad_left");
+        dad_right = hardwareMap.get(Servo.class,"dad_right");
+        dad_left = hardwareMap.get(Servo.class,"dad_left");
         blockstick = hardwareMap.get(Servo.class, "blockstick");
 
         //sensorRange = hardwareMap.get(DistanceSensor.class, "sensor_range");
@@ -90,7 +90,8 @@ public class JopMode extends OpMode  {
         rough.setDirection(Servo.Direction.FORWARD);
         grip.setDirection(Servo.Direction.REVERSE);
         blockstick.setDirection(Servo.Direction.FORWARD);
-        grab_left.setDirection(Servo.Direction.FORWARD);
+        dad_left.setDirection(Servo.Direction.FORWARD);
+        dad_right.setDirection(Servo.Direction.FORWARD);
 
         //intake_left.setDirection(DcMotor.Direction.FORWARD);
         //intake_right.setDirection((DcMotor.Direction.REVERSE));
@@ -151,17 +152,27 @@ public class JopMode extends OpMode  {
         double intakeOut = gamepad1.right_trigger;
         boolean blockstickdown = gamepad1.a;
 
-        //temp dadder (left = 0.4)
-        double grabPos = grab_left.getPosition();
-        boolean grableftup = gamepad1.dpad_up;
-        boolean grableftdown = gamepad1.dpad_down;
-        if(grableftup&&(grabPos<1)){
-            grabPos+=0.01;
+        //temp dadder (right =0.0down 0.3up left=0.3down 0.0up)
+        double leftgrabPos = dad_left.getPosition();
+        double rightgrabPos = dad_right.getPosition();
+        boolean grableft = gamepad1.left_bumper;
+        boolean grabright = gamepad1.right_bumper;
+        if(grableft){
+            if(leftgrabPos==0.3){//left down
+                dad_left.setPosition(0);
+            }
+            if(leftgrabPos==0){//left up
+                dad_left.setPosition(0.3);
+            }
         }
-        if(grableftdown&&(grabPos>0)){
-            grabPos-=0.01;
+        if(grabright){
+            if(rightgrabPos==0.3){//right up?
+                dad_right.setPosition(0);
+            }
+            if(rightgrabPos==0){
+                dad_right.setPosition(0.3);
+            }
         }
-        grab_left.setPosition(grabPos);
 
         //blockstick
         if(blockstickdown){
@@ -236,13 +247,15 @@ public class JopMode extends OpMode  {
         }
 
 
+        double gripposition = grip.getPosition();
         //grip
         if(Grip==true){
-            grip.setPosition(0);
-
-        }
-        else if(Grip==false){
-            grip.setPosition(1);
+            if(gripposition==1){ //close
+                grip.setPosition(0);
+            }
+            if(gripposition==0) { //open
+                grip.setPosition(1);
+            }
         }
 
         //the everything
@@ -289,7 +302,18 @@ public class JopMode extends OpMode  {
         telemetry.addData("Rough Pos", " (%.2f)", roughposition);
         telemetry.addData("Fine Pos","(%.2f)", fineposition);
         telemetry.addData("Block Stick Position","(%.2f)", blockstickposition);
-        telemetry.addData("Grabber Position", "(%.2f)", grabPos);
+        if(rightgrabPos==0){
+            telemetry.addData("Right Grabber Position", " down");
+        }
+        if(rightgrabPos==0.3){
+            telemetry.addData("Right Grabber Position", " up");
+        }
+        if(leftgrabPos==0){
+            telemetry.addData("Left Grabber Position", " up");
+        }
+        if(leftgrabPos==0.3){
+            telemetry.addData("Left Grabber Position", " down");
+        }
 
 
         //sensor range stuff
