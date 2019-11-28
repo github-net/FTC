@@ -28,7 +28,7 @@ import java.util.Locale;
  */
 
 @TeleOp
-        //(name="JopMode", group="Opmode")
+//(name="JopMode", group="Opmode")
 //@Disabled
 public class JopMode extends OpMode  {
     // Declare motors and servos
@@ -55,7 +55,7 @@ public class JopMode extends OpMode  {
     static final double MAX_POS     =  1.0;     // Maximum rotational position
     static final double MIN_POS     =  0.0;     // Minimum rotational position
     double  roughposition = 0.28;
-    double fineposition= 0.37;
+    double fineposition= 0.94;
     double blockstickposition = 0.0;
 
 
@@ -164,6 +164,9 @@ public class JopMode extends OpMode  {
             if(leftgrabPos==0){//left up
                 dad_left.setPosition(0.3);
             }
+            else{
+                dad_left.setPosition(0.3);
+            }
         }
         if(grabright){
             if(rightgrabPos==0.3){//right up?
@@ -172,16 +175,19 @@ public class JopMode extends OpMode  {
             if(rightgrabPos==0){
                 dad_right.setPosition(0.3);
             }
+            else{
+                dad_right.setPosition(0);
+            }
         }
 
         //blockstick
-        if(blockstickdown){
+        double blockstickposition = blockstick.getPosition();
+        if(blockstickdown&&(blockstickposition<0.5)){
             blockstick.setPosition(1);
         }
-        else {
+        else if (blockstickdown&&(blockstickposition>0.5)) {
             blockstick.setPosition(0.0);
         }
-        blockstickposition=blockstick.getPosition();
         //rough aka rv
         if (rv>0) {
             // Keep stepping up until we hit the max value.
@@ -246,7 +252,6 @@ public class JopMode extends OpMode  {
             intake_left.setPower(-intakePower * intakeCurrentPower);
         }
 
-
         double gripposition = grip.getPosition();
         //grip
         if(Grip==true){
@@ -301,20 +306,10 @@ public class JopMode extends OpMode  {
         telemetry.addData("Max Intake Power", "(%.2f)", intakeCurrentPower);
         telemetry.addData("Rough Pos", " (%.2f)", roughposition);
         telemetry.addData("Fine Pos","(%.2f)", fineposition);
-        telemetry.addData("Block Stick Position","(%.2f)", blockstickposition);
-        if(rightgrabPos==0){
-            telemetry.addData("Right Grabber Position", " down");
-        }
-        if(rightgrabPos==0.3){
-            telemetry.addData("Right Grabber Position", " up");
-        }
-        if(leftgrabPos==0){
-            telemetry.addData("Left Grabber Position", " up");
-        }
-        if(leftgrabPos==0.3){
-            telemetry.addData("Left Grabber Position", " down");
-        }
-
+        telemetry.addData("Grip Position", "(%.2f)", gripposition);
+        telemetry.addData("Block Stick Position"," (%.2f)", blockstickposition);
+        telemetry.addData("Right Grabber Position", " (%.2f)", rightgrabPos);
+        telemetry.addData("Left Grabber Position", " (%.2f)", leftgrabPos);
 
         //sensor range stuff
         //telemetry.addData("deviceName",sensorRange.getDeviceName() );
