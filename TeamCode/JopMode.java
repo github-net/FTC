@@ -143,9 +143,9 @@ public class JopMode extends OpMode  {
         boolean fineright = gamepad2.dpad_right;
 
         //gamepad 1
-        double drive  = gamepad1.left_stick_y; //up and down values
+        double drive  = gamepad1.left_stick_y*0.5; //up and down values
         double strafe =  gamepad1.left_stick_x; //side to side values
-        double rotate = -gamepad1.right_stick_x;
+        double rotate = -gamepad1.right_stick_x*0.5;
         double intakePower = gamepad1.left_trigger;
         boolean intakePdown = gamepad1.dpad_down;
         boolean intakePup = gamepad1.dpad_up;
@@ -292,10 +292,10 @@ public class JopMode extends OpMode  {
 
 
         // Send calculated power to wheels
-        leftDrive.setPower(-leftPower*0.5);
-        rightDrive.setPower(-rightPower*0.5);
-        back_leftDrive.setPower(-backleftPower*0.5);
-        back_rightDrive.setPower(backrightPower*0.5);
+        leftDrive.setPower(-leftPower);
+        rightDrive.setPower(-rightPower);
+        back_leftDrive.setPower(-backleftPower);
+        back_rightDrive.setPower(backrightPower);
 
         // Show the elapsed game time, wheel power, and capturing power
         telemetry.addData("Initialization time", ":" + runtime.toString());
