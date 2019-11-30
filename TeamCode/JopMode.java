@@ -143,8 +143,8 @@ public class JopMode extends OpMode  {
         boolean fineright = gamepad2.dpad_right;
 
         //gamepad 1
-        double drive  = -gamepad1.left_stick_y; //up and down values
-        double strafe =  -gamepad1.left_stick_x; //side to side values
+        double drive  = gamepad1.left_stick_y; //up and down values
+        double strafe =  gamepad1.left_stick_x; //side to side values
         double rotate = -gamepad1.right_stick_x;
         double intakePower = gamepad1.left_trigger;
         boolean intakePdown = gamepad1.dpad_down;
@@ -186,7 +186,7 @@ public class JopMode extends OpMode  {
             blockstick.setPosition(1);
         }
         else if (blockstickdown&&(blockstickposition>0.5)) {
-            blockstick.setPosition(0.0);
+            blockstick.setPosition(0.1);
         }
         //rough aka rv
         if (rv>0) {
@@ -292,10 +292,10 @@ public class JopMode extends OpMode  {
 
 
         // Send calculated power to wheels
-        leftDrive.setPower(-leftPower);
-        rightDrive.setPower(-rightPower);
-        back_leftDrive.setPower(-backleftPower);
-        back_rightDrive.setPower(backrightPower);
+        leftDrive.setPower(-leftPower*0.5);
+        rightDrive.setPower(-rightPower*0.5);
+        back_leftDrive.setPower(-backleftPower*0.5);
+        back_rightDrive.setPower(backrightPower*0.5);
 
         // Show the elapsed game time, wheel power, and capturing power
         telemetry.addData("Initialization time", ":" + runtime.toString());
@@ -319,7 +319,5 @@ public class JopMode extends OpMode  {
         //telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlight.didTimeoutOccur()));
 
     }
-
-
 
 }
