@@ -79,7 +79,7 @@ public class JopMode extends OpMode  {
         dad_left = hardwareMap.get(Servo.class,"dad_left");
         blockstick = hardwareMap.get(Servo.class, "blockstick");
 
-        //sensorRange = hardwareMap.get(DistanceSensor.class, "sensor_range");
+        sensorRange = hardwareMap.get(DistanceSensor.class, "sensor_range");
 
 
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -150,7 +150,7 @@ public class JopMode extends OpMode  {
         boolean intakePdown = gamepad1.dpad_down;
         boolean intakePup = gamepad1.dpad_up;
         double intakeOut = gamepad1.right_trigger;
-        boolean blockstickdown = gamepad1.a;
+        boolean blockstickdown = gamepad1.x;
 
         //temp dadder (right =0.0down 0.3up left=0.3down 0.0up)
         double leftgrabPos = dad_left.getPosition();
@@ -312,11 +312,11 @@ public class JopMode extends OpMode  {
         telemetry.addData("Left Grabber Position", " (%.2f)", leftgrabPos);
 
         //sensor range stuff
-        //telemetry.addData("deviceName",sensorRange.getDeviceName() );
-        //telemetry.addData("range", String.format(Locale.US, "%.01f cm", sensorRange.getDistance(DistanceUnit.CM)));
-        // Rev2mDistanceSensor specific methods.
-        //telemetry.addData("ID", String.format("%x", sensorTimeOfFlight.getModelID()));
-        //telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlight.didTimeoutOccur()));
+        telemetry.addData("deviceName",sensorRange.getDeviceName() );
+        telemetry.addData("range", String.format(Locale.US, "%.01f cm", sensorRange.getDistance(DistanceUnit.CM)));
+         //Rev2mDistanceSensor specific methods.
+        telemetry.addData("ID", String.format("%x", sensorTimeOfFlight.getModelID()));
+        telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlight.didTimeoutOccur()));
 
     }
 
