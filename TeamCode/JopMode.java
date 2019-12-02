@@ -96,7 +96,7 @@ public class JopMode extends OpMode  {
         //intake_left.setDirection(DcMotor.Direction.FORWARD);
         //intake_right.setDirection((DcMotor.Direction.REVERSE));
 
-        //sensorTimeOfFlight = (Rev2mDistanceSensor)sensorRange;
+        sensorTimeOfFlight = (Rev2mDistanceSensor)sensorRange;
 
         //initialization is complete.
         //killmenow
@@ -165,7 +165,7 @@ public class JopMode extends OpMode  {
                 dad_left.setPosition(0.3);
             }
             else{
-                dad_left.setPosition(0.3);
+
             }
         }
         if(grabright){
@@ -176,7 +176,7 @@ public class JopMode extends OpMode  {
                 dad_right.setPosition(0.3);
             }
             else{
-                dad_right.setPosition(0);
+
             }
         }
 
