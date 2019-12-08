@@ -214,7 +214,7 @@ public class JopMode extends OpMode  {
 
         if (fineleft) {
             // Keep stepping up until we hit the max value.
-            fineposition += INCREMENT ;
+            fineposition += INCREMENT*5 ;
             if (fineposition >= MAX_POS ) {
                 fineposition = MAX_POS;
 
@@ -222,7 +222,7 @@ public class JopMode extends OpMode  {
         }
         else if(fineright){
             // Keep stepping down until we hit the min value.
-            fineposition -= INCREMENT ;
+            fineposition -= INCREMENT*5 ;
             if (fineposition <= MIN_POS ) {
                 fineposition = MIN_POS;
             }
