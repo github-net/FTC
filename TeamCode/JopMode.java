@@ -30,7 +30,7 @@ import java.util.Locale;
 @TeleOp
 //(name="JopMode", group="Opmode")
 //@Disabled
-public class JopMode extends OpMode  {
+public class Manual extends OpMode  {
     // Declare motors and servos
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftDrive = null;
@@ -54,7 +54,7 @@ public class JopMode extends OpMode  {
     static final int    CYCLE_MS    =   50;     // period of each cycle
     static final double MAX_POS     =  1.0;     // Maximum rotational position
     static final double MIN_POS     =  0.0;     // Minimum rotational position
-    double  roughposition = 0.28;
+    double roughposition = 0.28;
     double fineposition= 0.94;
     double blockstickposition = 0.0;
 
@@ -78,10 +78,7 @@ public class JopMode extends OpMode  {
         dad_right = hardwareMap.get(Servo.class,"dad_right");
         dad_left = hardwareMap.get(Servo.class,"dad_left");
         blockstick = hardwareMap.get(Servo.class, "blockstick");
-
         sensorRange = hardwareMap.get(DistanceSensor.class, "sensor_range");
-
-
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
         back_leftDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -92,12 +89,9 @@ public class JopMode extends OpMode  {
         blockstick.setDirection(Servo.Direction.FORWARD);
         dad_left.setDirection(Servo.Direction.FORWARD);
         dad_right.setDirection(Servo.Direction.FORWARD);
-
         //intake_left.setDirection(DcMotor.Direction.FORWARD);
         //intake_right.setDirection((DcMotor.Direction.REVERSE));
-
         sensorTimeOfFlight = (Rev2mDistanceSensor)sensorRange;
-
         //initialization is complete.
         //killmenow
         telemetry.addData( "Status: ", "Successfully Initialized .-.");
@@ -106,7 +100,6 @@ public class JopMode extends OpMode  {
     public void start() {
         runtime.reset();
     }
-
     // Computes the current battery voltage
     double getBatteryVoltage() {
         double result = Double.POSITIVE_INFINITY;
@@ -122,7 +115,6 @@ public class JopMode extends OpMode  {
     public void loop() throws IllegalArgumentException
     {
 
-        // Setup a variable for each drive wheel to save power level for telemetry
         double leftPower;
         double rightPower;
         double backleftPower;
@@ -131,17 +123,6 @@ public class JopMode extends OpMode  {
         double rightpercentPower;
         double backleftpercentPower;
         double backrightpercentPower;
-
-
-        //gamepad 2
-        boolean everything = gamepad2.a;
-        boolean rveverything = gamepad2.b;
-        boolean Grip = gamepad2.x;
-        double liftPower = gamepad2.left_stick_y;
-        double rv = gamepad2.right_stick_x;
-        boolean fineleft = gamepad2.dpad_left;
-        boolean fineright = gamepad2.dpad_right;
-
         //gamepad 1
         double drive  = gamepad1.left_stick_y*0.5; //up and down values
         double strafe =  -gamepad1.left_stick_x; //side to side values
@@ -149,90 +130,6 @@ public class JopMode extends OpMode  {
         double intakePower = gamepad1.left_trigger;
         boolean motorPdown = gamepad1.dpad_down;
         boolean motorPup = gamepad1.dpad_up;
-        double intakeOut = gamepad1.right_trigger;
-        boolean blockstickdown = gamepad1.x;
-
-        //temp dadder (right =0.0down 0.3up left=0.3down 0.0up)
-        double leftgrabPos = dad_left.getPosition();
-        double rightgrabPos = dad_right.getPosition();
-        boolean grableft = gamepad1.right_bumper;
-        boolean grabright = gamepad1.left_bumper;
-        if(grableft){
-            if(leftgrabPos==0.3){//left down
-                dad_left.setPosition(0);
-            }
-            if(leftgrabPos==0){//left up
-                dad_left.setPosition(0.3);
-            }
-            else{
-
-            }
-        }
-        if(grabright){
-            if(rightgrabPos==0.3){//right up?
-                dad_right.setPosition(0);
-            }
-            if(rightgrabPos==0){
-                dad_right.setPosition(0.3);
-            }
-            else{
-
-            }
-        }
-
-        //blockstick
-        double blockstickposition = blockstick.getPosition();
-        if(blockstickdown&&(blockstickposition<0.5)){
-            blockstick.setPosition(1);
-        }
-        else if (blockstickdown&&(blockstickposition>0.5)) {
-            blockstick.setPosition(0.1);
-        }
-        //rough aka rv
-        if (rv>0) {
-            // Keep stepping up until we hit the max value.
-            roughposition += 0.72 ; //quarter: 18 third: 24 half: 36
-            if (roughposition >= 1 ) {
-                roughposition = MAX_POS;
-
-            }
-        }
-        else if(rv<0){
-
-            roughposition -= 0.72 ; //quarter: 18 third: 24 half: 36
-            if (roughposition <= 0.28 ) {
-                roughposition = MIN_POS;
-            }
-        }
-        else if (rv==0){
-
-        }
-        if(roughposition<0.28){
-            roughposition=0.28;
-        }
-        rough.setPosition(roughposition);
-
-        if (fineleft) {
-            // Keep stepping up until we hit the max value.
-            fineposition += INCREMENT*5 ;
-            if (fineposition >= MAX_POS ) {
-                fineposition = MAX_POS;
-
-            }
-        }
-        else if(fineright){
-            // Keep stepping down until we hit the min value.
-            fineposition -= INCREMENT*5 ;
-            if (fineposition <= MIN_POS ) {
-                fineposition = MIN_POS;
-            }
-
-        }
-        fine.setPosition(fineposition);
-
-
-//i wanna commit parentheses genocide
-
         //intake power
         if(motorPup==true&&(motorPower!=1)){
             motorPower+=0.25;
@@ -240,64 +137,18 @@ public class JopMode extends OpMode  {
         if(motorPdown==true&&(motorPower!=0)){
             motorPower-=0.25;
         }
-
-
-        //intake
-        if(intakeOut>0){
-            intake_right.setPower(-intakeOut );
-            intake_left.setPower(intakeOut );
-        }
-        else {
-            intake_right.setPower(intakePower);
-            intake_left.setPower(-intakePower);
-        }
-
-        double gripposition = grip.getPosition();
-        //grip
-        if(Grip==true){
-            if(gripposition==1){ //close
-                grip.setPosition(0);
-            }
-            if(gripposition==0) { //open
-                grip.setPosition(1);
-            }
-        }
-
-        //the everything
-        if(everything){
-            //lift.setPower(1);
-            try { Thread.sleep(500); } catch (InterruptedException e) { }
-            lift.setPower(0);
-        }
-
-        //lift
-        lift.setPower(liftPower*0.5);
-        if(liftPower==0){
-            lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        }
-
-        //POWER SETTING
-
         leftPower        = Range.clip(drive + strafe - rotate, -1.5+(getBatteryVoltage()/13), 1.5-(getBatteryVoltage()/13)) ;
         leftpercentPower = Range.clip(drive + strafe - rotate, -1.0, 1.0);
-
         rightPower       = Range.clip(drive - strafe + rotate,  -1.5+(getBatteryVoltage()/13), 1.5-(getBatteryVoltage()/13)) ;
         rightpercentPower = Range.clip(drive - strafe + rotate, -1.0, 1.0);
-
         backleftPower    = Range.clip(drive - strafe - rotate,  -1.5+(getBatteryVoltage()/13), 1.5-(getBatteryVoltage()/13)) ;
         backleftpercentPower = Range.clip(drive - strafe - rotate,  -1.0, 1.0) ;
-
         backrightPower   = Range.clip(drive + strafe + rotate,  -1.5+(getBatteryVoltage()/13), 1.5-(getBatteryVoltage()/13)) ;
         backrightpercentPower =  Range.clip(drive + strafe + rotate,  -1.0, 1.0) ;
-
-
-        // Send calculated power to wheels
         leftDrive.setPower(-leftPower*motorPower);
         rightDrive.setPower(-rightPower*motorPower);
         back_leftDrive.setPower(-backleftPower*motorPower);
         back_rightDrive.setPower(backrightPower*motorPower);
-
-        // Show the elapsed game time, wheel power, and capturing power
         telemetry.addData("Initialization time", ":" + runtime.toString());
         telemetry.addData("Front Motors", "Left Motor Power: (%.2f)  Right Motor Power (%.2f)", leftpercentPower*100, rightpercentPower*100);
         telemetry.addData("Back Motors", "Back Left Motor Power: (%.2f) Back Right Motor Power (%.2f)", backleftpercentPower*100, backrightpercentPower*100);
@@ -306,30 +157,13 @@ public class JopMode extends OpMode  {
         telemetry.addData("Max Motor Power", "(%.2f)", motorPower);
         telemetry.addData("Rough Pos", " (%.2f)", roughposition);
         telemetry.addData("Fine Pos","(%.2f)", fineposition);
-        telemetry.addData("Grip Position", "(%.2f)", gripposition);
         telemetry.addData("Block Stick Position"," (%.2f)", blockstickposition);
-        if(rightgrabPos==0.3){
-            telemetry.addData("Left Grabber Position", " up");
-        }
-        if(rightgrabPos==0){
-            telemetry.addData("Left Grabber Position", " down");
-        }
-
-        if(leftgrabPos==0){
-            telemetry.addData("Right Grabber Position", " up");
-        }
-        if(leftgrabPos==0.3){
-            telemetry.addData("Right Grabber Position", " down");
-        }
-
 
         //sensor range stuff
         telemetry.addData("deviceName",sensorRange.getDeviceName() );
         telemetry.addData("range", String.format(Locale.US, "%.01f cm", sensorRange.getDistance(DistanceUnit.CM)));
-         //Rev2mDistanceSensor specific methods.
+        //Rev2mDistanceSensor specific methods.
         telemetry.addData("ID", String.format("%x", sensorTimeOfFlight.getModelID()));
         telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlight.didTimeoutOccur()));
-
     }
-
 }
