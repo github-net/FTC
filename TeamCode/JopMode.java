@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 //import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -8,7 +9,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
+//import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Gyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -16,7 +17,7 @@ import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
-import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+//import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
@@ -47,8 +48,8 @@ public class Manual extends OpMode  {
     private Servo dad_left = null;
     private Servo blockstick = null;
     double motorPower=1.00;
-    private DistanceSensor sensorRange;
-    private Rev2mDistanceSensor sensorTimeOfFlight;
+    //private DistanceSensor sensorRange;
+    //private Rev2mDistanceSensor sensorTimeOfFlight;
 
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
     static final int    CYCLE_MS    =   50;     // period of each cycle
@@ -71,27 +72,14 @@ public class Manual extends OpMode  {
         back_rightDrive = hardwareMap.get(DcMotor.class, "back_right_drive");
         intake_left = hardwareMap.get(DcMotor.class, "intake_left");
         intake_right = hardwareMap.get(DcMotor.class, "intake_right");
-        lift = hardwareMap.get(DcMotor.class, "lift");
-        grip = hardwareMap.get(Servo.class, "grip");
-        fine = hardwareMap.get(Servo.class,"fine");
-        rough = hardwareMap.get(Servo.class,"rough");
-        dad_right = hardwareMap.get(Servo.class,"dad_right");
-        dad_left = hardwareMap.get(Servo.class,"dad_left");
-        blockstick = hardwareMap.get(Servo.class, "blockstick");
-        sensorRange = hardwareMap.get(DistanceSensor.class, "sensor_range");
+        //sensorRange = hardwareMap.get(DistanceSensor.class, "sensor_range");
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
         back_leftDrive.setDirection(DcMotor.Direction.FORWARD);
         back_rightDrive.setDirection(DcMotor.Direction.FORWARD);
-        fine.setDirection(Servo.Direction.FORWARD);
-        rough.setDirection(Servo.Direction.FORWARD);
-        grip.setDirection(Servo.Direction.REVERSE);
-        blockstick.setDirection(Servo.Direction.FORWARD);
-        dad_left.setDirection(Servo.Direction.FORWARD);
-        dad_right.setDirection(Servo.Direction.FORWARD);
-        //intake_left.setDirection(DcMotor.Direction.FORWARD);
-        //intake_right.setDirection((DcMotor.Direction.REVERSE));
-        sensorTimeOfFlight = (Rev2mDistanceSensor)sensorRange;
+        intake_left.setDirection(DcMotor.Direction.REVERSE);
+        intake_right.setDirection((DcMotor.Direction.FORWARD));
+        //sensorTimeOfFlight = (Rev2mDistanceSensor)sensorRange;
         //initialization is complete.
         //killmenow
         telemetry.addData( "Status: ", "Successfully Initialized .-.");
@@ -124,9 +112,9 @@ public class Manual extends OpMode  {
         double backleftpercentPower;
         double backrightpercentPower;
         //gamepad 1
-        double drive  = gamepad1.left_stick_y*0.5; //up and down values
+        double drive  = gamepad1.left_stick_y; //up and down values
         double strafe =  -gamepad1.left_stick_x; //side to side values
-        double rotate = -gamepad1.right_stick_x*0.5;
+        double rotate = gamepad1.right_stick_x;
         double intakePower = gamepad1.left_trigger;
         boolean motorPdown = gamepad1.dpad_down;
         boolean motorPup = gamepad1.dpad_up;
@@ -137,6 +125,19 @@ public class Manual extends OpMode  {
         if(motorPdown==true&&(motorPower!=0)){
             motorPower-=0.25;
         }
+        if(gamepad1.right_trigger>0){ //intake in
+            intake_left.setPower(-gamepad1.right_trigger);
+            intake_right.setPower(-gamepad1.right_trigger);
+        }
+        else if(gamepad1.left_trigger>0){ //intake out
+            intake_left.setPower(gamepad1.left_trigger);
+            intake_right.setPower(gamepad1.left_trigger);
+        }
+        else{
+            intake_left.setPower(0);
+            intake_right.setPower(0);
+        }
+
         leftPower        = Range.clip(drive + strafe - rotate, -1.5+(getBatteryVoltage()/13), 1.5-(getBatteryVoltage()/13)) ;
         leftpercentPower = Range.clip(drive + strafe - rotate, -1.0, 1.0);
         rightPower       = Range.clip(drive - strafe + rotate,  -1.5+(getBatteryVoltage()/13), 1.5-(getBatteryVoltage()/13)) ;
@@ -160,10 +161,10 @@ public class Manual extends OpMode  {
         telemetry.addData("Block Stick Position"," (%.2f)", blockstickposition);
 
         //sensor range stuff
-        telemetry.addData("deviceName",sensorRange.getDeviceName() );
-        telemetry.addData("range", String.format(Locale.US, "%.01f cm", sensorRange.getDistance(DistanceUnit.CM)));
+        //telemetry.addData("deviceName",sensorRange.getDeviceName() );
+        //telemetry.addData("range", String.format(Locale.US, "%.01f cm", sensorRange.getDistance(DistanceUnit.CM)));
         //Rev2mDistanceSensor specific methods.
-        telemetry.addData("ID", String.format("%x", sensorTimeOfFlight.getModelID()));
-        telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlight.didTimeoutOccur()));
+        //telemetry.addData("ID", String.format("%x", sensorTimeOfFlight.getModelID()));
+        //telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlight.didTimeoutOccur()));
     }
 }
