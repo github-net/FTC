@@ -20,13 +20,7 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 //import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
 import java.util.Locale;
-
-/**
- working version
- no more grip
- */
 
 @TeleOp
 //(name="JopMode", group="Opmode")
@@ -40,30 +34,15 @@ public class Manual extends OpMode  {
     private DcMotor back_rightDrive = null;
     private DcMotor intake_left = null;
     private DcMotor intake_right = null;
-    private DcMotor lift = null;
+    private DcMotor lift_r = null;
+    private DcMotor lift_l = null;
+    private CRServo arm_r = null;
+    private CRServo arm_l = null;
     private Servo grip = null;
-    private Servo fine = null;
-    private Servo rough = null;
-    private Servo dad_right = null;
-    private Servo dad_left = null;
-    private Servo blockstick = null;
     double motorPower=1.00;
     //private DistanceSensor sensorRange;
     //private Rev2mDistanceSensor sensorTimeOfFlight;
-
-    static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
-    static final int    CYCLE_MS    =   50;     // period of each cycle
-    static final double MAX_POS     =  1.0;     // Maximum rotational position
-    static final double MIN_POS     =  0.0;     // Minimum rotational position
-    double roughposition = 0.28;
-    double fineposition= 0.94;
-    double blockstickposition = 0.0;
-
-
-    /*
-    initialization
-    pew pew justin is here
-     */
+    double gripPos = 0.85;
     @Override
     public void init() throws IllegalArgumentException {
         leftDrive  = hardwareMap.get(DcMotor.class, "left_drive");
@@ -72,16 +51,24 @@ public class Manual extends OpMode  {
         back_rightDrive = hardwareMap.get(DcMotor.class, "back_right_drive");
         intake_left = hardwareMap.get(DcMotor.class, "intake_left");
         intake_right = hardwareMap.get(DcMotor.class, "intake_right");
+        lift_r = hardwareMap.get(DcMotor.class,"lift_r");
+        lift_l = hardwareMap.get(DcMotor.class,"lift_l");
+        arm_r = hardwareMap.get(CRServo.class,"arm_r");
+        arm_l = hardwareMap.get(CRServo.class,"arm_l");
+        grip = hardwareMap.get(Servo.class,"grip");
         //sensorRange = hardwareMap.get(DistanceSensor.class, "sensor_range");
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
         back_leftDrive.setDirection(DcMotor.Direction.FORWARD);
         back_rightDrive.setDirection(DcMotor.Direction.FORWARD);
         intake_left.setDirection(DcMotor.Direction.REVERSE);
-        intake_right.setDirection((DcMotor.Direction.FORWARD));
+        intake_right.setDirection(DcMotor.Direction.FORWARD);
+        lift_l.setDirection(DcMotor.Direction.FORWARD);
+        lift_r.setDirection(DcMotor.Direction.REVERSE);
+        //arm_l.setDirection(Servo.Direction.FORWARD);
+        //arm_r.setDirection(Servo.Direction.REVERSE);
+        grip.setDirection(Servo.Direction.FORWARD);
         //sensorTimeOfFlight = (Rev2mDistanceSensor)sensorRange;
-        //initialization is complete.
-        //killmenow
         telemetry.addData( "Status: ", "Successfully Initialized .-.");
     }
     @Override
@@ -100,9 +87,7 @@ public class Manual extends OpMode  {
         return result;
     }
     @Override
-    public void loop() throws IllegalArgumentException
-    {
-
+    public void loop() throws IllegalArgumentException {
         double leftPower;
         double rightPower;
         double backleftPower;
@@ -118,13 +103,14 @@ public class Manual extends OpMode  {
         double intakePower = gamepad1.left_trigger;
         boolean motorPdown = gamepad1.dpad_down;
         boolean motorPup = gamepad1.dpad_up;
-        //intake power
+
         if(motorPup==true&&(motorPower!=1)){
             motorPower+=0.25;
         }
         if(motorPdown==true&&(motorPower!=0)){
             motorPower-=0.25;
         }
+        //intake power
         if(gamepad1.right_trigger>0){ //intake in
             intake_left.setPower(-gamepad1.right_trigger);
             intake_right.setPower(-gamepad1.right_trigger);
@@ -137,7 +123,33 @@ public class Manual extends OpMode  {
             intake_left.setPower(0);
             intake_right.setPower(0);
         }
+        //slide
+        lift_r.setPower(-gamepad2.left_stick_y*0.5);
+        lift_l.setPower(-gamepad2.left_stick_y*0.5);
+        if(gamepad2.left_stick_y==0){
+            lift_r.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            lift_l.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
+        //arm
+        arm_l.setPower(gamepad2.right_stick_y);
+        arm_r.setPower(-gamepad2.right_stick_y);
+        //grip
+        if(gamepad2.x==true){
+            if(gripPos==0.83){
+                gripPos+=0.09;
+                if(gripPos>0.92){
+                    gripPos=0.92;
+                }
+            }
+            else {
+                gripPos-=0.09;
+                if(gripPos<0.83){
+                    gripPos=0.83;
+                }
 
+            }
+        }
+        grip.setPosition(gripPos);
         leftPower        = Range.clip(drive + strafe - rotate, -1.5+(getBatteryVoltage()/13), 1.5-(getBatteryVoltage()/13)) ;
         leftpercentPower = Range.clip(drive + strafe - rotate, -1.0, 1.0);
         rightPower       = Range.clip(drive - strafe + rotate,  -1.5+(getBatteryVoltage()/13), 1.5-(getBatteryVoltage()/13)) ;
@@ -156,15 +168,6 @@ public class Manual extends OpMode  {
         telemetry.addData("Le Voltage", "(%.2f) V", getBatteryVoltage());
         telemetry.addData("Le Intake Power", "(%.2f)", intakePower);
         telemetry.addData("Max Motor Power", "(%.2f)", motorPower);
-        telemetry.addData("Rough Pos", " (%.2f)", roughposition);
-        telemetry.addData("Fine Pos","(%.2f)", fineposition);
-        telemetry.addData("Block Stick Position"," (%.2f)", blockstickposition);
-
-        //sensor range stuff
-        //telemetry.addData("deviceName",sensorRange.getDeviceName() );
-        //telemetry.addData("range", String.format(Locale.US, "%.01f cm", sensorRange.getDistance(DistanceUnit.CM)));
-        //Rev2mDistanceSensor specific methods.
-        //telemetry.addData("ID", String.format("%x", sensorTimeOfFlight.getModelID()));
-        //telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlight.didTimeoutOccur()));
+        telemetry.addData("Grip Pos","(%.2f)", gripPos);
     }
 }
