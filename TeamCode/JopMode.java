@@ -123,6 +123,23 @@ public class Manual extends OpMode  {
             intake_left.setPower(0);
             intake_right.setPower(0);
         }
+        //gamepad2
+        if(gamepad2.a){
+            gripPos = 0.92;
+            grip.setPosition(0.92);
+            arm_l.setPower(-1);
+            arm_r.setPower(1);
+            try{
+                Thread.sleep(1500);
+            } catch(InterruptedException e){ }
+        }
+        if(gamepad2.y){
+            arm_r.setPower(1);
+            arm_l.setPower(-1);
+            try{
+                Thread.sleep(500);
+            } catch(InterruptedException e){ }
+        }
         //slide
         lift_r.setPower(-gamepad2.left_stick_y*0.5);
         lift_l.setPower(-gamepad2.left_stick_y*0.5);
