@@ -112,8 +112,8 @@ public class Manual extends OpMode  {
         }
         //intake power
         if(gamepad1.right_trigger>0){ //intake in
-            intake_left.setPower(-gamepad1.right_trigger);
-            intake_right.setPower(-gamepad1.right_trigger);
+            intake_left.setPower(-gamepad1.right_trigger*0.5);
+            intake_right.setPower(-gamepad1.right_trigger*0.5);
         }
         else if(gamepad1.left_trigger>0){ //intake out
             intake_left.setPower(gamepad1.left_trigger);
@@ -130,14 +130,14 @@ public class Manual extends OpMode  {
             arm_l.setPower(-1);
             arm_r.setPower(1);
             try{
-                Thread.sleep(1500);
+                Thread.sleep(1111);
             } catch(InterruptedException e){ }
         }
         if(gamepad2.y){
             arm_r.setPower(1);
             arm_l.setPower(-1);
             try{
-                Thread.sleep(500);
+                Thread.sleep(333);
             } catch(InterruptedException e){ }
         }
         //slide
