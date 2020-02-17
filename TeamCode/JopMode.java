@@ -1,32 +1,17 @@
 package org.firstinspires.ftc.teamcode;
 
 //import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
-//import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.Gyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.ServoController;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
-//import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import java.util.Locale;
 
 @TeleOp
-//(name="JopMode", group="Opmode")
-//@Disabled
-public class Manual extends OpMode  {
-    // Declare motors and servos
+public class JopMode extends OpMode  {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;
@@ -40,8 +25,6 @@ public class Manual extends OpMode  {
     private CRServo arm_l = null;
     private Servo grip = null;
     double motorPower=1.00;
-    //private DistanceSensor sensorRange;
-    //private Rev2mDistanceSensor sensorTimeOfFlight;
     double gripPos = 0.85;
     @Override
     public void init() throws IllegalArgumentException {
@@ -65,17 +48,13 @@ public class Manual extends OpMode  {
         intake_right.setDirection(DcMotor.Direction.FORWARD);
         lift_l.setDirection(DcMotor.Direction.FORWARD);
         lift_r.setDirection(DcMotor.Direction.REVERSE);
-        //arm_l.setDirection(Servo.Direction.FORWARD);
-        //arm_r.setDirection(Servo.Direction.REVERSE);
         grip.setDirection(Servo.Direction.FORWARD);
-        //sensorTimeOfFlight = (Rev2mDistanceSensor)sensorRange;
         telemetry.addData( "Status: ", "Successfully Initialized .-.");
     }
     @Override
     public void start() {
         runtime.reset();
     }
-    // Computes the current battery voltage
     double getBatteryVoltage() {
         double result = Double.POSITIVE_INFINITY;
         for (VoltageSensor sensor : hardwareMap.voltageSensor) {
@@ -96,7 +75,6 @@ public class Manual extends OpMode  {
         double rightpercentPower;
         double backleftpercentPower;
         double backrightpercentPower;
-        //gamepad 1
         double drive  = gamepad1.left_stick_y; //up and down values
         double strafe =  -gamepad1.left_stick_x; //side to side values
         double rotate = gamepad1.right_stick_x;
@@ -110,7 +88,6 @@ public class Manual extends OpMode  {
         if(motorPdown==true&&(motorPower!=0)){
             motorPower-=0.25;
         }
-        //intake power
         if(gamepad1.right_trigger>0){ //intake in
             intake_left.setPower(-gamepad1.right_trigger);
             intake_right.setPower(-gamepad1.right_trigger);
@@ -123,31 +100,12 @@ public class Manual extends OpMode  {
             intake_left.setPower(0);
             intake_right.setPower(0);
         }
-        //gamepad2
-        if(gamepad2.a){
-            gripPos = 0.92;
-            grip.setPosition(0.92);
-            arm_l.setPower(-1);
-            arm_r.setPower(1);
-            try{
-                Thread.sleep(1500);
-            } catch(InterruptedException e){ }
-        }
-        if(gamepad2.y){
-            arm_r.setPower(1);
-            arm_l.setPower(-1);
-            try{
-                Thread.sleep(500);
-            } catch(InterruptedException e){ }
-        }
-        //slide
         lift_r.setPower(-gamepad2.left_stick_y*0.5);
         lift_l.setPower(-gamepad2.left_stick_y*0.5);
         if(gamepad2.left_stick_y==0){
             lift_r.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             lift_l.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
-        //arm
         arm_l.setPower(gamepad2.right_stick_y);
         arm_r.setPower(-gamepad2.right_stick_y);
         //grip
