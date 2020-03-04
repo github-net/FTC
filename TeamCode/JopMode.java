@@ -39,6 +39,7 @@ public class Manual extends OpMode  {
     private CRServo arm_r = null;
     private CRServo arm_l = null;
     private Servo grip = null;
+    private Servo foundation = null;
     double motorPower=1.00;
     //private DistanceSensor sensorRange;
     //private Rev2mDistanceSensor sensorTimeOfFlight;
@@ -56,6 +57,7 @@ public class Manual extends OpMode  {
         arm_r = hardwareMap.get(CRServo.class,"arm_r");
         arm_l = hardwareMap.get(CRServo.class,"arm_l");
         grip = hardwareMap.get(Servo.class,"grip");
+        foundation = hardwareMap.get(Servo.class,"foundation");
         //sensorRange = hardwareMap.get(DistanceSensor.class, "sensor_range");
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -112,8 +114,8 @@ public class Manual extends OpMode  {
         }
         //intake power
         if(gamepad1.right_trigger>0){ //intake in
-            intake_left.setPower(-gamepad1.right_trigger*0.5);
-            intake_right.setPower(-gamepad1.right_trigger*0.5);
+            intake_left.setPower(-gamepad1.right_trigger*0.75);
+            intake_right.setPower(-gamepad1.right_trigger*0.75);
         }
         else if(gamepad1.left_trigger>0){ //intake out
             intake_left.setPower(gamepad1.left_trigger);
@@ -122,6 +124,15 @@ public class Manual extends OpMode  {
         else{
             intake_left.setPower(0);
             intake_right.setPower(0);
+        }
+
+        if(gamepad1.b){
+            if(foundation.getPosition()!=0.6){
+                foundation.setPosition(0.6);
+            }
+            else{
+                foundation.setPosition(1);
+            }
         }
         //gamepad2
         if(gamepad2.a){
