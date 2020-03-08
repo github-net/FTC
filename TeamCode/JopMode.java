@@ -40,10 +40,12 @@ public class Manual extends OpMode  {
     private CRServo arm_l = null;
     private Servo grip = null;
     private Servo foundation = null;
+    private Servo cap = null;
     double motorPower=1.00;
     //private DistanceSensor sensorRange;
     //private Rev2mDistanceSensor sensorTimeOfFlight;
     double gripPos = 0.85;
+    double capPos=0;
     @Override
     public void init() throws IllegalArgumentException {
         leftDrive  = hardwareMap.get(DcMotor.class, "left_drive");
@@ -58,6 +60,7 @@ public class Manual extends OpMode  {
         arm_l = hardwareMap.get(CRServo.class,"arm_l");
         grip = hardwareMap.get(Servo.class,"grip");
         foundation = hardwareMap.get(Servo.class,"foundation");
+        cap = hardwareMap.get(Servo.class, "cap");
         //sensorRange = hardwareMap.get(DistanceSensor.class, "sensor_range");
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -98,6 +101,7 @@ public class Manual extends OpMode  {
         double rightpercentPower;
         double backleftpercentPower;
         double backrightpercentPower;
+
         //gamepad 1
         double drive  = gamepad1.left_stick_y; //up and down values
         double strafe =  -gamepad1.left_stick_x; //side to side values
@@ -125,7 +129,6 @@ public class Manual extends OpMode  {
             intake_left.setPower(0);
             intake_right.setPower(0);
         }
-
         if(gamepad1.b){
             if(foundation.getPosition()!=0.6){
                 foundation.setPosition(0.6);
@@ -135,6 +138,13 @@ public class Manual extends OpMode  {
             }
         }
         //gamepad2
+        cap.setPosition(capPos);
+        if(gamepad2.dpad_up){
+            capPos=1.0;
+        }
+        if(gamepad2.dpad_down){
+            capPos=0.36;
+        }
         if(gamepad2.a){
             gripPos = 0.92;
             grip.setPosition(0.92);
@@ -197,5 +207,6 @@ public class Manual extends OpMode  {
         telemetry.addData("Le Intake Power", "(%.2f)", intakePower);
         telemetry.addData("Max Motor Power", "(%.2f)", motorPower);
         telemetry.addData("Grip Pos","(%.2f)", gripPos);
+        telemetry.addData("Cap Pos", "(%.2f)", capPos);
     }
 }
