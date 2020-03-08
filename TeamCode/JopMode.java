@@ -1,32 +1,15 @@
 package org.firstinspires.ftc.teamcode;
-
-//import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
-//import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.Gyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
-//import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import java.util.Locale;
-
 @TeleOp
-//(name="JopMode", group="Opmode")
-//@Disabled
 public class Manual extends OpMode  {
-    // Declare motors and servos
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;
@@ -42,10 +25,8 @@ public class Manual extends OpMode  {
     private Servo foundation = null;
     private Servo cap = null;
     double motorPower=1.00;
-    //private DistanceSensor sensorRange;
-    //private Rev2mDistanceSensor sensorTimeOfFlight;
     double gripPos = 0.85;
-    double capPos=0;
+    double capPos=0.36;
     @Override
     public void init() throws IllegalArgumentException {
         leftDrive  = hardwareMap.get(DcMotor.class, "left_drive");
@@ -61,7 +42,6 @@ public class Manual extends OpMode  {
         grip = hardwareMap.get(Servo.class,"grip");
         foundation = hardwareMap.get(Servo.class,"foundation");
         cap = hardwareMap.get(Servo.class, "cap");
-        //sensorRange = hardwareMap.get(DistanceSensor.class, "sensor_range");
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
         back_leftDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -70,10 +50,7 @@ public class Manual extends OpMode  {
         intake_right.setDirection(DcMotor.Direction.FORWARD);
         lift_l.setDirection(DcMotor.Direction.FORWARD);
         lift_r.setDirection(DcMotor.Direction.REVERSE);
-        //arm_l.setDirection(Servo.Direction.FORWARD);
-        //arm_r.setDirection(Servo.Direction.REVERSE);
         grip.setDirection(Servo.Direction.FORWARD);
-        //sensorTimeOfFlight = (Rev2mDistanceSensor)sensorRange;
         telemetry.addData( "Status: ", "Successfully Initialized .-.");
     }
     @Override
@@ -101,7 +78,6 @@ public class Manual extends OpMode  {
         double rightpercentPower;
         double backleftpercentPower;
         double backrightpercentPower;
-
         //gamepad 1
         double drive  = gamepad1.left_stick_y; //up and down values
         double strafe =  -gamepad1.left_stick_x; //side to side values
@@ -109,7 +85,6 @@ public class Manual extends OpMode  {
         double intakePower = gamepad1.left_trigger;
         boolean motorPdown = gamepad1.dpad_down;
         boolean motorPup = gamepad1.dpad_up;
-
         if(motorPup==true&&(motorPower!=1)){
             motorPower+=0.25;
         }
@@ -184,7 +159,6 @@ public class Manual extends OpMode  {
                 if(gripPos<0.87){
                     gripPos=0.87;
                 }
-
             }
         }
         grip.setPosition(gripPos);
