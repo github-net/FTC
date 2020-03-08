@@ -173,16 +173,16 @@ public class Manual extends OpMode  {
         arm_r.setPower(-gamepad2.right_stick_y);
         //grip
         if(gamepad2.x==true){
-            if(gripPos==0.83){
-                gripPos+=0.09;
+            if(gripPos==0.87){
+                gripPos+=0.05;
                 if(gripPos>0.92){
                     gripPos=0.92;
                 }
             }
             else {
-                gripPos-=0.09;
-                if(gripPos<0.83){
-                    gripPos=0.83;
+                gripPos-=0.05;
+                if(gripPos<0.87){
+                    gripPos=0.87;
                 }
 
             }
